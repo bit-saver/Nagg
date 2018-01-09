@@ -1,4 +1,6 @@
-# Nagg
+## NAGG
+News Aggregrator
+<p>Front End that is served by the Laravel backend.  Allows users to browse articles scraped from RSS feeds filtered by custom curated keywords.</p>
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.2.6.
 
