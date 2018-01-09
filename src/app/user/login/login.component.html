@@ -1,0 +1,23 @@
+<div class="card mx-auto col-12 col-sm-8 col-md-4">
+    <div class="card-block">
+        <h4 class="card-title">
+            Login
+        </h4>
+        <div class="card-text">
+            <form (ngSubmit)="onLogin(f)" #f="ngForm">
+                <div class="alert alert-danger" *ngIf="error">
+                    {{ error.error || 'Please correct the errors below.' }}
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" ngModel class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" ngModel class="form-control" required>
+                </div>
+                <button type="submit" [disabled]="f.pristine && !f.valid" class="btn btn-primary">Log In</button>
+            </form>
+        </div>
+    </div>
+</div>

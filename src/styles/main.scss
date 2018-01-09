@@ -1,0 +1,84 @@
+body {
+    overflow-y: scroll;
+}
+
+#app {
+    padding-top: 90px;
+    padding-bottom: 30px;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+.btn,
+.btn:hover,
+.btn:active,
+.btn:focus,
+.btn:visited {
+    outline: 0 !important;
+}
+
+.switch {
+    label {
+
+    }
+    .onoffswitch {
+        position: relative; width: 49px;
+        -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+        margin-top: -3px;
+        display: inline-block;
+    }
+    .onoffswitch-checkbox {
+        display: none;
+    }
+
+    .onoffswitch-label {
+        display: block;
+        overflow: hidden;
+        cursor: pointer;
+        border-radius: 20px;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+    .onoffswitch-inner {
+        display: block; width: 200%; margin-left: -100%;
+        transition: margin 0.3s ease-in 0s;
+    }
+    .onoffswitch-inner:before, .onoffswitch-inner:after {
+        display: block; float: left; width: 50%; height: 20px; padding: 0; line-height: 20px;
+        font-size: 10px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+        box-sizing: border-box;
+    }
+    .onoffswitch-inner:before {
+        content: "ON";
+        padding-left: 8px;
+        background-color: #3c763d;
+        color: #FFFFFF;
+    }
+    .onoffswitch-inner:after {
+        content: "OFF";
+        padding-right: 8px;
+        background-color: #EEEEEE; color: #999999;
+        text-align: right;
+    }
+    .onoffswitch-switch {
+        display: block;
+        width: 13px;
+        height: 13px;
+        margin: 5px;
+        background: #FFFFFF;
+        position: absolute;
+        top: -2px;
+        bottom: 0;
+        right: 25px;
+        border: 2px solid #D3D9E3; border-radius: 20px;
+        transition: all 0.3s ease-in 0s;
+    }
+    .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+        margin-left: 0;
+    }
+    .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+        right: 0;
+    }
+}

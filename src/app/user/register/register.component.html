@@ -1,0 +1,30 @@
+
+<div class="card mx-auto col-12 col-sm-8 col-md-4">
+    <div class="card-block">
+        <h4 class="card-title">
+            Register
+        </h4>
+        <div class="card-text"><form (ngSubmit)="onRegister(f)" #f="ngForm">
+            <div class="alert alert-danger" *ngIf="error">
+                Please correct the errors below.
+            </div>
+            <div class="form-group" [ngClass]="{'has-danger': error && error.name}">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" ngModel class="form-control" required>
+                <p *ngIf="error && error.name" class="help-block">{{ error.name }}</p>
+            </div>
+            <div class="form-group" [ngClass]="{'has-danger': error && error.email}">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" ngModel class="form-control" required>
+                <p *ngIf="error && error.email" class="help-block">{{ error.email }}</p>
+            </div>
+            <div class="form-group" [ngClass]="{'has-danger': error && error.password}">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" ngModel class="form-control" required>
+                <p *ngIf="error && error.password" class="help-block">{{ error.password }}</p>
+            </div>
+            <button type="submit" [disabled]="!f.valid" class="btn btn-primary">Register</button>
+        </form>
+        </div>
+    </div>
+</div>

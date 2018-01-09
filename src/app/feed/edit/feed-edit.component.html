@@ -1,0 +1,132 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2>My Sites</h2>
+            <accordion>
+                <accordion-group *ngFor="let site of sites">
+                    <div accordion-heading>
+                        <div class="float-left">
+                            {{ site.title }}
+                        </div>
+                        <div class="float-right">
+                            {{ site.sources_count }}
+                        </div>
+                    </div>
+                    {{ site.domain }}
+                </accordion-group>
+            </accordion>
+
+            <form name="addSite" (ngSubmit)="onAddSite(addSite)" #addSite="ngForm">
+                <div class="card mt-2">
+                    <div class="card-block">
+                        <h4 class="card-title">
+                            Add New Site URL
+                        </h4>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label>RSS Index URL</label>
+                                    <input type="text" class="form-control" title="RSS URL" name="url" ngModel />
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label>Site Title</label>
+                                    <input type="text" class="form-control" title="Site Title" name="title" ngModel />
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label>Site Domain</label>
+                                    <input type="text" class="form-control" title="Site Domain" name="domain" ngModel />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <button class="btn btn-success" type="submit" [disabled]="loading.adding">
+                                        <span *ngIf="!loading.adding">Add Sources</span>
+                                        <span *ngIf="loading.adding"><i class="fa fa-spinner fa-spin"></i></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <form name="addRss" (ngSubmit)="onAddFeed(addRss)" #addRss="ngForm">
+                <div class="card mt-2">
+                    <div class="card-block">
+                        <h4 class="card-title">
+                            Add New RSS Feed
+                        </h4>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label>Site</label>
+                                    <select name="site_id" class="form-control" title="Site" [(ngModel)]="simpleValue">
+                                        <option *ngFor="let site of sites" [value]="site.id">{{ site.title }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label>RSS URL</label>
+                                    <input type="text" class="form-control" title="RSS URL" name="url" ngModel />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <button class="btn btn-success" type="submit" [disabled]="loading.adding">
+                                        <span *ngIf="!loading.adding">Add Source</span>
+                                        <span *ngIf="loading.adding"><i class="fa fa-spinner fa-spin"></i></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <form name="addRssBulk" (ngSubmit)="onAddBulk(addRssBulk)" #addRssBulk="ngForm">
+                <div class="card mt-2">
+                    <div class="card-block">
+                        <h4 class="card-title">
+                            Add Bulk RSS Feeds
+                        </h4>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label>Site</label>
+                                    <select name="site_id" class="form-control" title="Site" [(ngModel)]="simpleValue2">
+                                        <option *ngFor="let site of sites" [value]="site.id">{{ site.title }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-8">
+                                <div class="form-group">
+                                    <label>RSS URLs</label>
+                                    <textarea class="form-control" title="RSS URLs" rows="10" name="urls" ngModel></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <button class="btn btn-success" type="submit" [disabled]="loading.adding">
+                                        <span *ngIf="!loading.adding">Add Source</span>
+                                        <span *ngIf="loading.adding"><i class="fa fa-spinner fa-spin"></i></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

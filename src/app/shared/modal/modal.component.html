@@ -1,0 +1,22 @@
+<div bsModal #globalModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true" (onHidden)="onHidden($event)">
+    <div class="modal-dialog {{ modal.modalClasses }}">
+        <div class="modal-content {{ modal.contentClasses}}">
+            <div class="modal-header">
+                <h4 class="modal-title pull-left">{{modal.title}}</h4>
+                <button type="button" class="close pull-right" aria-label="Close" (click)="hideModal()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body {{ modal.bodyClasses }}">
+                {{ modal.body }}
+
+                <button *ngIf="modal.type == 'toast'" type="button" class="close pull-right" aria-label="Close" (click)="hideModal()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" (click)="hideModal()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

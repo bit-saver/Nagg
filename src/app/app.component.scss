@@ -1,0 +1,68 @@
+.navbar-brand {
+    max-width: 90px;
+
+    .site-title,
+    .site-tagline {
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+
+    .site-title {
+        letter-spacing: 4px;
+        margin-top: -15px;
+    }
+    .site-tagline {
+        font-size: 0.7rem;
+        line-height: 1;
+    }
+}
+
+.modal-dialog.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    text-align: center;
+
+    .modal-header,
+    .modal-footer {
+        display: none;
+    }
+}
+
+.navbar {
+    @media (min-width: 992px) {
+        padding: 1rem 1rem 0;
+    }
+}
+
+.navbar-nav {
+    .nav-link {
+        padding: 0.5em 1em;
+        @media (min-width: 992px) {
+            padding: 0.7em 1em 0.3em;
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+        }
+
+        &:not(.active):hover {
+            background: #c8c8c8;
+        }
+
+        &.active {
+            background: #fff;
+        }
+    }
+}
+
+.navbar-toggler {
+    border: 0;
+    outline: 0;
+    &:hover,
+    &:active,
+    &:visited,
+    &:focus {
+        outline: 0;
+    }
+}

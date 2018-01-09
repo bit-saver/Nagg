@@ -1,0 +1,222 @@
+<div id="sidebar-mobile" class="sidebar hidden-lg-up">
+    <a class="sidebar-toggle text-center" href="javascript:void(0)" (click)="toggleCollapse()">
+        Edit Feed
+        <br/>
+        <i class="fa fa-lg fa-angle-down" *ngIf="isCollapsed"></i>
+        <i class="fa fa-lg fa-angle-up" *ngIf="!isCollapsed"></i>
+    </a>
+    <div class="container-fluid content" [collapse]="isCollapsed" (clickOutside)="onClickOutside()">
+        <div class="row">
+            <div class="col-12">
+                <div class="row mb-2">
+                    <div class="col-12 text-center">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="View">
+                            <button type="button" class="btn" [ngClass]="{'btn-primary': grid, 'btn-secondary': !grid}" (click)="grid = true"><i class="fa fa-th"></i></button>
+                            <button type="button" class="btn" [ngClass]="{'btn-primary': !grid, 'btn-secondary': grid}" (click)="grid = false"><i class="fa fa-list"></i></button>
+                        </div>
+                        <button class="btn btn-success btn-sm" type="button" (click)="reloadArticles()"><i class="fa fa-refresh" [ngClass]="{'fa-spin': loading.articles}"></i> Refresh Feed</button>
+                    </div>
+                </div>
+                <accordion>
+                    <accordion-group heading="Filter" panelClass="sidebar-accordion">
+                        <div class="col-12">
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="radio" name="filter-top" [value]="false" [(ngModel)]="filter.keywords" [checked]="!filter.keywords" (change)="toggleFilter()">
+                                    Show All Articles
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="radio" name="filter-top" [value]="true" [(ngModel)]="filter.keywords" [checked]="filter.keywords" (change)="toggleFilter()">
+                                    Filter Keywords
+                                </label>
+                            </div>
+                        </div>
+                        <div class="switch">
+                            <div class="switch-container">
+                                <div class="onoffswitch" (click)="toggleShowKeywords()">
+                                    <input type="checkbox" class="onoffswitch-checkbox" title="Filter" name="filter" value="1" [ngModel]="show_keywords">
+                                    <label class="onoffswitch-label">
+                                        <span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <label>Show Article Keywords</label>
+                        </div>
+                        <form name="addKeyword" class="" ngForm (ngSubmit)="onAddKeyword(f)" #f="ngForm">
+                            <div class="form-group">
+                                <label>Add Keyword</label>
+                                <div class="input-group">
+                                    <input type="text" title="Keyword" name="keyword" class="form-control" autocomplete="off"
+                                           [(ngModel)]="keyword"
+                                           [typeahead]="keywordSearch"
+                                           [typeaheadWaitMs]="500"
+                                           typeaheadOptionsLimit="15"
+                                           typeaheadMinLength="2"
+                                    />
+                                    <span class="input-group-btn">
+                                        <button type="submit" class="btn btn-success">Add</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </form>
+                    </accordion-group>
+                    <accordion-group heading="Keyword List" panelClass="sidebar-accordion">
+                        <div class="keywords">
+                            <span class="keyword selected" *ngFor="let phrase of user_phrases | values:'id'"  (click)="removePhrase(phrase.id)">
+                                {{ phrase.phrase }}
+                            </span>
+                        </div>
+                    </accordion-group>
+                </accordion>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="feed"
+     infinite-scroll
+     [infiniteScrollDistance]="2"
+     [infiniteScrollThrottle]="300"
+     (scrolled)="onScroll()">
+    <div class="articles" [ngClass]="{'list-view': !grid}">
+        <div class="row">
+            <div class="col-12">
+                <!--<h4>News Feed</h4>-->
+                <div class="row">
+                    <article [ngClass]="{'col-lg-4 col-md-6 col-sm-12': grid, 'col-12': !grid}" class="{{ (grid ? 'col-lg-4 col-md-6 col-sm-12' : 'col-12') }}" *ngFor="let article of articles; let i = index" id="article-{{ article.id }}" [style.opacity]="getOpacity(article)">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="float-left grid-only">
+                                    {{ article.source.site.title }}
+                                </div>
+                                <div class="float-left list-only">
+                                    <h5 class="card-title"><a target="_blank" href="{{article.url}}">{{ article.title }}</a></h5>
+                                </div>
+                                <div class="float-right">
+                                    <span class="list-only">
+                                        {{ article.published | date:'mediumDate' }}&nbsp; | &nbsp;{{ article.source.site.title }}&nbsp; | &nbsp;
+                                    </span>
+                                    <a class="card-link" href="javascript:void(0)" title="{{ (article.users.length > 0 && article.users[0].hidden ? 'Unhide' : 'Hide') }}" (click)="hideArticle(article, i)">
+                                        {{ (article.users.length > 0 && article.users[0].hidden ? 'Unhide' : 'Hide') }}
+                                    </a>
+                                    <a class="card-link" href="javascript:void(0)" title="{{ (article.users.length > 0 && article.users[0].saved ? 'Unsave' : 'Save') }}" (click)="saveArticle(article, i)">
+                                        <i class="fa fa-save" [ngClass]="{'text-success': article.users.length > 0 && article.users[0].saved}"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div *ngIf="article.media_url" class="article-img">
+                                <img src="{{ article.media_url }}" alt="{{ article.media_title }}" class="article-img">
+                            </div>
+                            <div class="card-block">
+                                <h4 class="card-title grid-only"><a target="_blank" href="{{article.url}}">{{ article.title }}</a></h4>
+                                <h6 class="card-subtitle mb-2 text-muted grid-only">
+                                    {{ article.published | date:'mediumDate' }}
+                                </h6>
+                                <p class="card-text">
+                                    {{ article.description }}
+                                </p>
+                                <div class="keywords" *ngIf="show_keywords">
+                                    <!--<span class="keyword" *ngFor="let keyword of article.keywords" (click)="toggleKeyword(keyword)" [ngClass]="{'selected': selected_keywords.indexOf(keyword.id) > -1}">-->
+                                    <span class="keyword" *ngFor="let keyword of article.keywords" (click)="toggleKeyword(keyword)" [ngClass]="getKeywordClass(article, keyword.id)">
+                                        {{ keyword.keyword }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    <div class="col-12 text-center" *ngIf="loading.articles">
+                        <i class="fa fa-3x fa-spinner fa-spin"></i>
+                    </div>
+                    <div class="col-12 text-center" *ngIf="!loading.articles && articles.length < 1">
+                        <div class="alert alert-warning" *ngIf="subpage === 'feed'">
+                            There are no articles matching your keywords.
+                        </div>
+                        <div class="alert alert-warning" *ngIf="subpage === 'saved'">
+                            You have no saved articles.  Save articles from the <a routerLink="/feed">feed</a> page by clicking the save icon on an article.
+                        </div>
+                        <div class="alert alert-warning" *ngIf="subpage === 'hidden'">
+                            You have no hidden articles.  Hide articles from the <a routerLink="/feed">feed</a> page by clicking hide on an article.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="sidebar" class="sidebar container-fluid hidden-md-down">
+        <div class="row mb-2">
+            <div class="col-12">
+                <div class="btn-group btn-group-sm" role="group" aria-label="View">
+                    <button type="button" class="btn" [ngClass]="{'btn-primary': grid, 'btn-secondary': !grid}" (click)="grid = true"><i class="fa fa-th"></i></button>
+                    <button type="button" class="btn" [ngClass]="{'btn-primary': !grid, 'btn-secondary': grid}" (click)="grid = false"><i class="fa fa-list"></i></button>
+                </div>
+                <button class="btn btn-success btn-sm" type="button" (click)="reloadArticles()"><i class="fa fa-refresh" [ngClass]="{'fa-spin': loading.articles}"></i> Refresh Feed</button>
+            </div>
+        </div>
+        <h4>Filter</h4>
+        <div class="row mb-3 border-b">
+            <div class="col-12">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="filter" [value]="false" [(ngModel)]="filter.keywords" [checked]="!filter.keywords" (change)="toggleFilter()">
+                        Show All Articles
+                    </label>
+                </div>
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="filter" [value]="true" [(ngModel)]="filter.keywords" [checked]="filter.keywords" (change)="toggleFilter()">
+                        Filter Keywords
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3 border-b">
+            <div class="col-12">
+                <div class="switch">
+                    <div class="switch-container">
+                        <div class="onoffswitch" (click)="toggleShowKeywords()">
+                            <input type="checkbox" class="onoffswitch-checkbox" title="Filter" name="filter" value="1" [ngModel]="show_keywords">
+                            <label class="onoffswitch-label">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <label>Show Article Keywords</label>
+                </div>
+                <form name="addKeyword" class="" ngForm (ngSubmit)="onAddKeyword(f)" #f="ngForm">
+                    <div class="form-group">
+                        <label>Add Keyword</label>
+                        <div class="input-group">
+                            <input type="text" title="Keyword" name="keyword" class="form-control" autocomplete="off"
+                                   [(ngModel)]="keyword"
+                                   [typeahead]="keywordSearch"
+                                   [typeaheadWaitMs]="500"
+                                   typeaheadOptionsLimit="15"
+                                   typeaheadMinLength="2"
+                            />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-success">Add</button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <h4>Keywords</h4>
+        <div class="row">
+            <div class="col-12">
+                <div class="keywords">
+                    <!--<span class="keyword selected" *ngFor="let keyword_id of selected_keywords" (click)="toggleKeyword(keywords[keyword_id])">-->
+                    <span class="keyword selected" *ngFor="let phrase of user_phrases | values:'id'"  (click)="removePhrase(phrase.id)">
+                        {{ phrase.phrase }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--</sticky>-->
+</div>
+

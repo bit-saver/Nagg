@@ -1,0 +1,12 @@
+.modal-dialog.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    text-align: center;
+
+    .modal-header,
+    .modal-footer {
+        display: none;
+    }
+}

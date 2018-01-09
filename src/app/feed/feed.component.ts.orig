@@ -1,0 +1,226 @@
+import {Component, OnInit} from '@angular/core';
+import {NgForm} from "@angular/forms";
+import {Observable} from "rxjs/Observable";
+import {ModalService} from "../shared/modal/modal.service";
+import {AuthXService} from "../user/auth/auth-x.service";
+
+
+class Loading {
+    articles: boolean
+}
+
+class Filter {
+    keywords: boolean;
+    hidden: boolean;
+    saved: boolean;
+}
+
+class TypeaheadCancel {
+    cancel: boolean = false;
+    timer: any = null;
+}
+
+@Component({
+	template: require('./feed.component.html'),
+    styles: [require('./feed.component.scss')]
+})
+export class FeedComponent implements OnInit {
+
+    error: any;
+
+    articles: any;
+
+    current_page: number;
+
+    loading: Loading = new Loading();
+
+    selected_keywords: any;
+
+    keywords: any;
+
+    filter: Filter = new Filter();
+    show_keywords: boolean = false;
+
+    keywordSearch: Observable<string>;
+    keyword: string;
+    typeaheadCancel: TypeaheadCancel = new TypeaheadCancel();
+
+    public isCollapsed:boolean = true;
+
+    constructor(private authHttp: AuthXService, private modalService: ModalService) {
+        this.error = null;
+        this.articles = [];
+        this.selected_keywords = [];
+        this.keywords = {};
+        this.current_page = 0;
+        let keywords = localStorage.getItem('filter.keywords');
+        if (keywords === null)
+            this.filter.keywords = false;
+        else
+            this.filter.keywords = keywords === '1';
+        let hidden = localStorage.getItem('filter.hidden');
+        if (hidden === null)
+            this.filter.hidden = true;
+        else
+            this.filter.hidden = hidden === '1';
+        let saved = localStorage.getItem('filter.saved');
+        if (saved === null)
+            this.filter.saved = false;
+        else
+            this.filter.saved = saved === '1';
+
+        let show_keywords = localStorage.getItem('show_keywords');
+        if (show_keywords !== null)
+            this.show_keywords = show_keywords === '1';
+    }
+
+    ngOnInit() {
+        this.loadArticles();
+        this.keywordSearch = Observable.create((observer: any) => {
+            this.authHttp.post('/keyword/search', {keyword: this.keyword})
+                .subscribe((data: any) => {
+                    if (this.typeaheadCancel.cancel) {
+                        console.log('typeahead cancelled');
+                        clearTimeout(this.typeaheadCancel.timer);
+                        this.typeaheadCancel.cancel = false;
+                    } else {
+                        let keywords = data.json();
+                        let ret = [];
+                        for (let kw of keywords)
+                            ret.push(kw.keyword);
+                        observer.next(ret);
+                    }
+            })
+        });
+
+    }
+
+    loadArticles() {
+        this.loading.articles = true;
+        this.current_page++;
+        let body = {page: this.current_page, filter: this.filter};
+        this.authHttp.post('/feed/articles', body)
+            .subscribe(
+                data => this.handleArticles(data.json()),
+                err => console.error(err),
+                () => this.loading.articles = false
+            )
+    }
+
+    handleArticles(data) {
+        for (let keyword of data.user_keywords) {
+            if (this.selected_keywords.indexOf(keyword.id) < 0) {
+                this.selected_keywords.push(keyword.id);
+                this.keywords[keyword.id] = keyword;
+            }
+        }
+        for (let article of data.articles.data)
+            this.articles.push(article);
+    }
+
+    reloadArticles() {
+        this.articles = [];
+        this.current_page = 0;
+        this.loadArticles();
+    }
+
+    onScroll() {
+        this.loadArticles();
+    }
+
+    toggleShowKeywords() {
+        this.show_keywords = !this.show_keywords;
+        localStorage.setItem('show_keywords', (this.show_keywords ? '1' : '0'));
+    }
+
+    toggleFilter(type: string) {
+        switch (type) {
+            case 'keywords':
+                this.filter.keywords = !this.filter.keywords;
+                localStorage.setItem('filter.keywords', (this.filter.keywords ? '1' : '0'));
+                break;
+            case 'hidden':
+                this.filter.hidden = !this.filter.hidden;
+                localStorage.setItem('filter.hidden', (this.filter.hidden ? '1' : '0'));
+                break;
+            case 'saved':
+                this.filter.saved = !this.filter.saved;
+                localStorage.setItem('filter.saved', (this.filter.saved ? '1' : '0'));
+                break;
+        }
+        this.reloadArticles();
+    }
+
+    toggleKeyword(keyword) {
+        if (this.selected_keywords.indexOf(keyword.id) > -1) {
+            this.selected_keywords.splice(this.selected_keywords.indexOf(keyword.id), 1);
+            delete this.keywords[keyword.id];
+            this.authHttp.post('/keyword/remove', {keyword_id: keyword.id})
+                .subscribe(
+                    data => console.log(data.json()),
+                    err => console.error(err)
+                );
+            if (this.filter.keywords)
+                setTimeout(() => this.reloadArticles(), 500);
+        } else {
+            this.selected_keywords.push(keyword.id);
+            this.keywords[keyword.id] = keyword;
+            this.authHttp.post('/keyword/add', {keyword_id: keyword.id})
+                .subscribe(
+                    data => console.log(data.json()),
+                    err => console.error(err)
+                );
+        }
+    }
+
+    onAddKeyword(form: NgForm) {
+        if (this.typeaheadCancel.timer)
+            clearTimeout(this.typeaheadCancel.timer);
+        this.typeaheadCancel.cancel = true;
+        this.typeaheadCancel.timer = setTimeout(() => {
+            this.typeaheadCancel.cancel = false;
+            this.typeaheadCancel.timer = null;
+        }, 1500);
+        this.authHttp.post('/keyword/add', {keyword: form.value.keyword})
+            .subscribe(
+                data => {
+                    this.toggleKeyword(data.json());
+                    if (this.filter) this.reloadArticles();
+                },
+                err => console.error(err),
+                () => form.reset()
+            )
+    }
+
+    hideArticle(article: any) {
+        let hidden = true;
+        if (article.users.length > 0)
+            hidden = !article.users[0].hidden;
+        this.authHttp.post('/feed/hide', {article_id: article.id, hidden: hidden})
+            .subscribe(
+                res => {
+                    if (article.users.length > 0)
+                        article.users[0].hidden = hidden;
+                    else
+                        article.users.push({hidden: hidden});
+                },
+                err => console.error(err)
+            )
+    }
+
+    saveArticle(article: any) {
+        let saved = true;
+        if (article.users.length > 0)
+            saved = !article.users[0].saved;
+        this.authHttp.post('/feed/save', {article_id: article.id, saved: saved})
+            .subscribe(
+                res => {
+                    if (article.users.length > 0)
+                        article.users[0].saved = saved;
+                    else
+                        article.users.push({saved: saved});
+                },
+                err => console.error(err)
+            )
+    }
+}
